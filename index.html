@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo da Memória</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        #game-board {
+            display: grid;
+            grid-template-columns: repeat(4, 100px);
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .card {
+            width: 100px;
+            height: 150px;
+            perspective: 1000px;
+        }
+
+        .card-inner {
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+
+        .card.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card-front,
+        .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+            padding: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        .card-front {
+            background: #ffa500;
+            color: white;
+        }
+
+        .card-back {
+            background: white;
+            transform: rotateY(180deg);
+            border: 1px solid #ddd;
+            font-size: 12px; /* Fonte menor para o texto */
+            line-height: 1.2; /* Espaçamento adequado para textos */
+            padding: 5px;
+        }
+
+        img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h1>Jogo da Memória</h1>
+    <div id="game-board"></div>
+    <script>
+        const cardsData = [
+    { id: 1, type: "image", content: "alexa.png" },
+    { id: 1, type: "text", content: "Assistente virtual que responde comandos de voz.." },
+    { id: 2, type: "image", content: "lixeira.png" },
+    { id: 2, type: "text", content: "Abre automaticamente ao detectar movimento próximo." },
+    { id: 3, type: "image", content: "relogio.png" },
+    { id: 3, type: "text", content: "Relógio inteligente que monitora saúde e notificações." },
+    { id: 4, type: "image", content: "robo.png" },
+    { id: 4, type: "text", content: "Aspira e limpa pisos automaticamente." },
+    { id: 5, type: "image", content: "fita.png" },
+    { id: 5, type: "text", content: "Iluminação decorativa controlada remotamente." },    
+    { id: 6, type: "image", content: "tele.png" },
+    { id: 6, type: "text", content: "Exibe texto para leitura em apresentações ou gravações." },
+      ];
+
+        let flippedCards = [];
+        let matchedPairs = 0;
+
+        // Embaralha as cartas
+        function shuffle(array) {
+            return array.sort(() => Math.random() - 0.5);
+        }
+
+        // Inicializa o jogo
+        function initGame() {
+            const gameBoard = document.getElementById('game-board');
+            gameBoard.innerHTML = ""; // Limpa o tabuleiro
+            const shuffledCards = shuffle(cardsData);
+
+            shuffledCards.forEach(card => {
+                const cardElement = document.createElement('div');
+                cardElement.classList.add('card');
+                cardElement.dataset.id = card.id; // Atribui o ID para verificar pares
+
+                const cardInner = document.createElement('div');
+                cardInner.classList.add('card-inner');
+
+                const cardFront = document.createElement('div');
+                cardFront.classList.add('card-front');
+                cardFront.textContent = "WIT KIDS";
+
+                const cardBack = document.createElement('div');
+                cardBack.classList.add('card-back');
+
+                if (card.type === "image") {
+                    const img = document.createElement('img');
+                    img.src = card.content;
+                    cardBack.appendChild(img);
+                } else {
+                    cardBack.textContent = card.content;
+                }
+
+                cardInner.appendChild(cardFront);
+                cardInner.appendChild(cardBack);
+                cardElement.appendChild(cardInner);
+
+                cardElement.addEventListener('click', () => flipCard(cardElement));
+                gameBoard.appendChild(cardElement);
+            });
+        }
+
+        // Lógica de virar cartas
+        function flipCard(card) {
+            if (flippedCards.length < 2 && !card.classList.contains('flipped')) {
+                card.classList.add('flipped');
+                flippedCards.push(card);
+
+                if (flippedCards.length === 2) {
+                    checkMatch();
+                }
+            }
+        }
+
+        // Verifica se as cartas formam um par
+        function checkMatch() {
+            const [card1, card2] = flippedCards;
+            const id1 = card1.dataset.id;
+            const id2 = card2.dataset.id;
+
+            if (id1 === id2) {
+                // Par encontrado
+                flippedCards = [];
+                matchedPairs++;
+
+                if (matchedPairs === cardsData.length / 2) {
+                    alert("Parabéns! Você encontrou todos os pares!");
+                }
+            } else {
+                // Não é par - vira de volta
+                setTimeout(() => {
+                    card1.classList.remove('flipped');
+                    card2.classList.remove('flipped');
+                    flippedCards = [];
+                }, 1000);
+            }
+        }
+
+        // Inicializa o jogo ao carregar a página
+        window.onload = initGame;
+    </script>
+</body>
+</html>
